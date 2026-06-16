@@ -1,0 +1,35 @@
+{{- $instanceName := env "INSTANCE_NAME" -}}
+{{- $baseDomain := env "BASE_DOMAIN" -}}
+serverAddr = "{{ env "FRP_SERVER_ADDR" }}"
+serverPort = {{ env "FRP_SERVER_PORT" }}
+
+auth.method = "token"
+auth.token = "{{ env "FRP_TOKEN" }}"
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+{{ range $container := . -}}
+{{- $rawName := trimPrefix "/" $container.Name -}}
+{{- $containerName := replace "_" "-" (replace "/" "-" (toLower $rawName)) -}}
+{{- $stackRaw := index $container.Labels "com.docker.compose.project" -}}
+{{- $stackName := replace "_" "-" (toLower $stackRaw) -}}
+{{- range $addr := $container.Addresses -}}
+{{- if and $addr.HostPort (eq $addr.Proto "tcp") -}}
+{{- if $stackName }}
+[[proxies]]
+name = "{{ $instanceName }}-{{ $stackName }}-{{ $containerName }}-port{{ $addr.HostPort }}"
+type = "http"
+localIP = "{{ $addr.IP }}"
+localPort = {{ $addr.Port }}
+customDomains = ["{{ $instanceName }}-{{ $stackName }}-{{ $containerName }}-port{{ $addr.HostPort }}.{{ $baseDomain }}"]
+{{ else }}
+[[proxies]]
+name = "{{ $instanceName }}-{{ $containerName }}-port{{ $addr.HostPort }}"
+type = "http"
+localIP = "{{ $addr.IP }}"
+localPort = {{ $addr.Port }}
+customDomains = ["{{ $instanceName }}-{{ $containerName }}-port{{ $addr.HostPort }}.{{ $baseDomain }}"]
+{{ end -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
