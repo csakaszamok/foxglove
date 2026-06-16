@@ -1,0 +1,8 @@
+.git
+docs/
+tests/
+README.md
+USAGE.md
+docker-compose.example.yml
+.gitignore
+instance-name
