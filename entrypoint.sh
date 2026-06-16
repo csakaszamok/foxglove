@@ -3,6 +3,7 @@ set -e
 
 INSTANCE_NAME_FILE=${INSTANCE_NAME_FILE:-/etc/instance/name}
 FRPC_CONFIG_DIR=${FRPC_CONFIG_DIR:-/etc/frpc}
+FRP_SERVER_ADDR=${FRP_SERVER_ADDR:-frps}
 
 # Validate instance name file
 if [ ! -f "$INSTANCE_NAME_FILE" ]; then
@@ -19,7 +20,7 @@ fi
 export INSTANCE_NAME
 
 # Validate required env vars
-for var in FRP_SERVER_ADDR FRP_SERVER_PORT FRP_TOKEN BASE_DOMAIN; do
+for var in FRP_SERVER_PORT FRP_TOKEN BASE_DOMAIN; do
     eval val=\$$var
     if [ -z "$val" ]; then
         echo "ERROR: Required environment variable $var is not set" >&2
