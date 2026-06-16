@@ -10,9 +10,9 @@ webServer.addr = "127.0.0.1"
 webServer.port = 7400
 {{ range $container := . -}}
 {{- $rawName := trimPrefix "/" $container.Name -}}
-{{- $containerName := replace "_" "-" (replace "/" "-" (toLower $rawName)) -}}
+{{- $containerName := replace (replace (toLower $rawName) "/" "-" -1) "_" "-" -1 -}}
 {{- $stackRaw := index $container.Labels "com.docker.compose.project" -}}
-{{- $stackName := replace "_" "-" (toLower $stackRaw) -}}
+{{- $stackName := replace (toLower $stackRaw) "_" "-" -1 -}}
 {{- range $addr := $container.Addresses -}}
 {{- if and $addr.HostPort (eq $addr.Proto "tcp") -}}
 {{- if $stackName }}
