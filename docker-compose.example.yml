@@ -1,0 +1,15 @@
+services:
+  dind:
+    image: dind-auto-frpc:latest
+    privileged: true
+    environment:
+      FRP_SERVER_ADDR: frp.example.com
+      FRP_SERVER_PORT: "7000"
+      FRP_TOKEN: your-secret-token
+      BASE_DOMAIN: my.local
+    volumes:
+      - ./instance-name:/etc/instance/name:ro
+      - dind-data:/var/lib/docker
+
+volumes:
+  dind-data:
