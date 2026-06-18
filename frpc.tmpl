@@ -13,20 +13,24 @@ webServer.port = 7400
 {{- $containerName := replace (replace (toLower $rawName) "/" "-" -1) "_" "-" -1 -}}
 {{- $stackRaw := index $container.Labels "com.docker.compose.project" -}}
 {{- $stackName := replace (toLower $stackRaw) "_" "-" -1 -}}
+{{- $ip := "" -}}
+{{- range $net := $container.Networks -}}
+{{- if not $ip -}}{{- $ip = $net.IP -}}{{- end -}}
+{{- end -}}
 {{- range $addr := $container.Addresses -}}
 {{- if and $addr.HostPort (eq $addr.Proto "tcp") -}}
 {{- if $stackName }}
 [[proxies]]
 name = "{{ $instanceName }}-{{ $stackName }}-{{ $containerName }}-port{{ $addr.HostPort }}"
 type = "http"
-localIP = "{{ $addr.IP }}"
+localIP = "{{ $ip }}"
 localPort = {{ $addr.Port }}
 customDomains = ["{{ $instanceName }}-{{ $stackName }}-{{ $containerName }}-port{{ $addr.HostPort }}.{{ $baseDomain }}"]
 {{ else }}
 [[proxies]]
 name = "{{ $instanceName }}-{{ $containerName }}-port{{ $addr.HostPort }}"
 type = "http"
-localIP = "{{ $addr.IP }}"
+localIP = "{{ $ip }}"
 localPort = {{ $addr.Port }}
 customDomains = ["{{ $instanceName }}-{{ $containerName }}-port{{ $addr.HostPort }}.{{ $baseDomain }}"]
 {{ end -}}
