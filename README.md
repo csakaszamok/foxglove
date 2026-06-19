@@ -4,12 +4,12 @@ Docker image that automatically exposes every inner container's published ports 
 
 ## Variants
 
-| Tag | Base | Isolation | Requirement |
-|-----|------|-----------|-------------|
-| `5-dind` | `docker:dind` | Docker-in-Docker | `--privileged` |
-| `5-sysbox` | `alpine:3.21` | [Sysbox runtime](https://github.com/nestybox/sysbox) | Sysbox installed on host |
+| Tag | Base | Isolation | Requirement | Use case |
+|-----|------|-----------|-------------|----------|
+| `5-sysbox` | `alpine:3.21` | [Sysbox runtime](https://github.com/nestybox/sysbox) | Sysbox installed on host | **Recommended for production** |
+| `5-dind` | `docker:dind` | Docker-in-Docker | `--privileged` | Development, Windows, or hosts without Sysbox |
 
-Use `5-dind` for standard Docker hosts. Use `5-sysbox` if you have Sysbox installed and want to avoid `--privileged`.
+**Sysbox is the recommended variant** — it runs without `--privileged`, which is safer for production environments. Use the `dind` variant on Windows or on Linux hosts where installing Sysbox is not an option.
 
 ## Quick Start
 
@@ -20,18 +20,7 @@ Use `5-dind` for standard Docker hosts. Use `5-sysbox` if you have Sysbox instal
 
 2. Run the container:
 
-   **DinD variant:**
-   ```sh
-   docker run -d --privileged \
-     -e FRP_SERVER_ADDR=frp.example.com \
-     -e FRP_SERVER_PORT=7000 \
-     -e FRP_TOKEN=your-secret-token \
-     -e BASE_DOMAIN=example.com \
-     -v $(pwd)/instance-name:/etc/instance/name:ro \
-     csakaszamok/foxglove:5-dind
-   ```
-
-   **Sysbox variant:**
+   **Sysbox (recommended):**
    ```sh
    docker run -d --runtime=sysbox-runc \
      -e FRP_SERVER_ADDR=frp.example.com \
@@ -40,6 +29,17 @@ Use `5-dind` for standard Docker hosts. Use `5-sysbox` if you have Sysbox instal
      -e BASE_DOMAIN=example.com \
      -v $(pwd)/instance-name:/etc/instance/name:ro \
      csakaszamok/foxglove:5-sysbox
+   ```
+
+   **DinD (development / Windows):**
+   ```sh
+   docker run -d --privileged \
+     -e FRP_SERVER_ADDR=frp.example.com \
+     -e FRP_SERVER_PORT=7000 \
+     -e FRP_TOKEN=your-secret-token \
+     -e BASE_DOMAIN=example.com \
+     -v $(pwd)/instance-name:/etc/instance/name:ro \
+     csakaszamok/foxglove:5-dind
    ```
 
 3. Start any container inside with a published port:

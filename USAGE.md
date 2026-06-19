@@ -3,8 +3,8 @@
 ## Prerequisites
 
 - A running **frp server** (`frps`) accessible from the host
-- For the `dind` variant: Docker with `--privileged` support
-- For the `sysbox` variant: [Sysbox runtime](https://github.com/nestybox/sysbox) installed on the host
+- **Sysbox variant (recommended):** [Sysbox runtime](https://github.com/nestybox/sysbox) installed on the host — no `--privileged` needed, safer for production
+- **DinD variant:** Docker with `--privileged` support — use this on Windows or on hosts where Sysbox is not available; intended for development
 
 ---
 
@@ -22,20 +22,7 @@ Use a short, DNS-safe name (alphanumeric and hyphens only).
 
 ## 2. Run the container
 
-**DinD variant** (standard Docker, requires `--privileged`):
-```sh
-docker run -d --privileged \
-  --name foxglove \
-  -e FRP_SERVER_ADDR=frp.example.com \
-  -e FRP_SERVER_PORT=7000 \
-  -e FRP_TOKEN=your-secret-token \
-  -e BASE_DOMAIN=example.com \
-  -v $(pwd)/instance-name:/etc/instance/name:ro \
-  -v foxglove-data:/var/lib/docker \
-  csakaszamok/foxglove:5-dind
-```
-
-**Sysbox variant** (no `--privileged` needed):
+**Sysbox variant (recommended):**
 ```sh
 docker run -d --runtime=sysbox-runc \
   --name foxglove \
@@ -46,6 +33,19 @@ docker run -d --runtime=sysbox-runc \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
   csakaszamok/foxglove:5-sysbox
+```
+
+**DinD variant (development / Windows):**
+```sh
+docker run -d --privileged \
+  --name foxglove \
+  -e FRP_SERVER_ADDR=frp.example.com \
+  -e FRP_SERVER_PORT=7000 \
+  -e FRP_TOKEN=your-secret-token \
+  -e BASE_DOMAIN=example.com \
+  -v $(pwd)/instance-name:/etc/instance/name:ro \
+  -v foxglove-data:/var/lib/docker \
+  csakaszamok/foxglove:5-dind
 ```
 
 Or with Docker Compose — copy `docker-compose.example.yml` to `docker-compose.yml` and fill in the values.

@@ -1,7 +1,7 @@
 services:
   foxglove:
-    image: csakaszamok/foxglove:5-dind   # or :5-sysbox — see README for differences
-    privileged: true                      # only needed for DinD variant; remove for Sysbox
+    image: csakaszamok/foxglove:5-sysbox  # use :5-dind on Windows or without Sysbox — see README
+    runtime: sysbox-runc                  # remove this line and add privileged: true for the dind variant
     environment:
       FRP_SERVER_ADDR: frp.example.com
       FRP_SERVER_PORT: "7000"
