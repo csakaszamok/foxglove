@@ -6,3 +6,5 @@ USAGE.md
 docker-compose.example.yml
 .gitignore
 instance-name
+upload-docker.sh
+docker-compose.yml

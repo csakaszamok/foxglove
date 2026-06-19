@@ -1,15 +1,15 @@
 services:
-  dind:
-    image: dind-auto-frpc:latest
-    privileged: true
+  foxglove:
+    image: csakaszamok/foxglove:5-dind   # or :5-sysbox — see README for differences
+    privileged: true                      # only needed for DinD variant; remove for Sysbox
     environment:
       FRP_SERVER_ADDR: frp.example.com
       FRP_SERVER_PORT: "7000"
       FRP_TOKEN: your-secret-token
-      BASE_DOMAIN: my.local
+      BASE_DOMAIN: example.com
     volumes:
       - ./instance-name:/etc/instance/name:ro
-      - dind-data:/var/lib/docker
+      - foxglove-data:/var/lib/docker
 
 volumes:
-  dind-data:
+  foxglove-data:

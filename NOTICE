@@ -1,0 +1,11 @@
+foxglove
+Copyright 2026 the Purgatory (p7y) authors
+
+This product is foxglove, the sandbox image of Purgatory (p7y),
+https://github.com/p7y-dev/foxglove, licensed under the Apache License,
+Version 2.0 (see LICENSE).
+
+If you redistribute foxglove, or a product built on it, keep this notice
+(Apache-2.0, section 4) so its users can see that it is based on foxglove.
+The names "Purgatory" and "p7y" are not licensed for use as the name of
+another product (section 6).

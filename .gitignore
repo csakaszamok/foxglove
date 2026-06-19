@@ -2,3 +2,10 @@
 /etc/frpc/frpc.toml
 
 .DS_Store
+
+# local instance config — never commit real instance names or tokens
+instance-name
+docker-compose.yml
+
+# internal planning docs
+docs/

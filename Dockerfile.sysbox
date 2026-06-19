@@ -1,0 +1,36 @@
+FROM alpine:3.21
+
+ARG FRP_VERSION=0.61.0
+ARG DOCKER_GEN_VERSION=0.14.7
+ARG TARGETARCH=amd64
+
+# docker package includes dockerd; supervisor runs multiple processes
+RUN apk add --no-cache docker supervisor wget
+
+# Install frpc
+RUN wget -q "https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_${TARGETARCH}.tar.gz" \
+        -O /tmp/frp.tar.gz \
+    && tar -xzf /tmp/frp.tar.gz -C /tmp \
+    && mv "/tmp/frp_${FRP_VERSION}_linux_${TARGETARCH}/frpc" /usr/local/bin/frpc \
+    && rm -rf /tmp/frp.tar.gz "/tmp/frp_${FRP_VERSION}_linux_${TARGETARCH}"
+
+# Install docker-gen (alpine variant — statically linked against musl)
+RUN wget -q "https://github.com/nginx-proxy/docker-gen/releases/download/${DOCKER_GEN_VERSION}/docker-gen-alpine-linux-${TARGETARCH}-${DOCKER_GEN_VERSION}.tar.gz" \
+        -O /tmp/docker-gen.tar.gz \
+    && tar -xzf /tmp/docker-gen.tar.gz -C /usr/local/bin \
+    && rm /tmp/docker-gen.tar.gz
+
+RUN mkdir -p /etc/frpc /etc/supervisor/conf.d
+
+COPY supervisord.sysbox.conf /etc/supervisor/conf.d/supervisord.conf
+COPY frpc.tmpl /etc/frpc/frpc.tmpl
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY wait-for-docker.sh /usr/local/bin/wait-for-docker.sh
+COPY frpc-reload.sh /usr/local/bin/frpc-reload.sh
+
+RUN chmod +x \
+    /usr/local/bin/entrypoint.sh \
+    /usr/local/bin/wait-for-docker.sh \
+    /usr/local/bin/frpc-reload.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
