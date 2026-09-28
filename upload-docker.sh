@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VERSION=$(cat "$(dirname "$0")/VERSION")
+VERSION=$(tr -d '[:space:]' < "$(dirname "$0")/VERSION")
 REGISTRY=${REGISTRY:-csakaszamok/foxglove}
 
 DIND_IMAGE="${REGISTRY}:${VERSION}-dind"
