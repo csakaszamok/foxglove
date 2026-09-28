@@ -39,16 +39,7 @@ else
     fail "detects empty instance name file (got: $result)"
 fi
 
-# Test: fails when FRP_SERVER_ADDR is missing
 printf 'worker01' > "$TMPDIR/name"
-result=$(INSTANCE_NAME_FILE="$TMPDIR/name" \
-    FRP_SERVER_PORT=7000 FRP_TOKEN=t BASE_DOMAIN=x.local \
-    run_ep || true)
-if echo "$result" | grep -q "FRP_SERVER_ADDR"; then
-    pass "detects missing FRP_SERVER_ADDR"
-else
-    fail "detects missing FRP_SERVER_ADDR (got: $result)"
-fi
 
 # Test: fails when BASE_DOMAIN is missing
 result=$(INSTANCE_NAME_FILE="$TMPDIR/name" \
@@ -69,6 +60,17 @@ if [ -f "$TMPDIR/frpc/frpc.toml" ] && grep -q "frp.example.com" "$TMPDIR/frpc/fr
     pass "writes frpc.toml with server address when all config present"
 else
     fail "writes frpc.toml when all config present (got: $result)"
+fi
+
+# Test: FRP_SERVER_ADDR/PORT defaults are exported (docker-gen renders frpc.tmpl from env)
+printf '#!/bin/sh\nenv > "%s"\n' "$TMPDIR/env" > "$TMPDIR/bin/supervisord"
+result=$(unset FRP_SERVER_ADDR FRP_SERVER_PORT; INSTANCE_NAME_FILE="$TMPDIR/name" \
+    FRP_TOKEN=secret BASE_DOMAIN=my.local \
+    run_ep)
+if grep -q '^FRP_SERVER_ADDR=frps$' "$TMPDIR/env" && grep -q '^FRP_SERVER_PORT=7000$' "$TMPDIR/env"; then
+    pass "exports FRP_SERVER_ADDR/FRP_SERVER_PORT defaults to supervisord"
+else
+    fail "exports FRP_SERVER_ADDR/FRP_SERVER_PORT defaults (env: $(grep FRP_ "$TMPDIR/env"))"
 fi
 
 echo "Results: $PASS passed, $FAIL failed"

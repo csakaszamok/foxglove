@@ -5,6 +5,8 @@ INSTANCE_NAME_FILE=${INSTANCE_NAME_FILE:-/etc/instance/name}
 FRPC_CONFIG_DIR=${FRPC_CONFIG_DIR:-/etc/frpc}
 FRP_SERVER_ADDR=${FRP_SERVER_ADDR:-frps}
 FRP_SERVER_PORT=${FRP_SERVER_PORT:-7000}
+# docker-gen renders frpc.tmpl from the environment, so the defaults must be exported
+export FRP_SERVER_ADDR FRP_SERVER_PORT
 
 # Validate instance name file
 if [ ! -f "$INSTANCE_NAME_FILE" ]; then
