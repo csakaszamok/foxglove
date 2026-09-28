@@ -8,6 +8,7 @@ auth.token = "{{ env "FRP_TOKEN" }}"
 
 webServer.addr = "127.0.0.1"
 webServer.port = 7400
+
 {{ range $container := . -}}
 {{- $rawName := trimPrefix "/" $container.Name -}}
 {{- $containerName := replace (replace (toLower $rawName) "/" "-" -1) "_" "-" -1 -}}
@@ -17,9 +18,17 @@ webServer.port = 7400
 {{- range $net := $container.Networks -}}
 {{- if not $ip -}}{{- $ip = $net.IP -}}{{- end -}}
 {{- end -}}
+{{- $subdomain := index $container.Labels "frpc.subdomain" -}}
 {{- range $addr := $container.Addresses -}}
 {{- if and $addr.HostPort (eq $addr.Proto "tcp") -}}
-{{- if $stackName }}
+{{- if $subdomain }}
+[[proxies]]
+name = "{{ $instanceName }}-{{ $subdomain }}"
+type = "http"
+localIP = "{{ $ip }}"
+localPort = {{ $addr.Port }}
+customDomains = ["{{ $instanceName }}-{{ $subdomain }}.{{ $baseDomain }}"]
+{{- else if $stackName }}
 [[proxies]]
 name = "{{ $instanceName }}-{{ $stackName }}-{{ $containerName }}-port{{ $addr.HostPort }}"
 type = "http"

@@ -28,7 +28,11 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY wait-for-docker.sh /usr/local/bin/wait-for-docker.sh
 COPY frpc-reload.sh /usr/local/bin/frpc-reload.sh
 
-RUN chmod +x \
+RUN sed -i 's/\r//' \
+    /usr/local/bin/entrypoint.sh \
+    /usr/local/bin/wait-for-docker.sh \
+    /usr/local/bin/frpc-reload.sh \
+ && chmod +x \
     /usr/local/bin/entrypoint.sh \
     /usr/local/bin/wait-for-docker.sh \
     /usr/local/bin/frpc-reload.sh
