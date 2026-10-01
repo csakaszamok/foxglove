@@ -5,7 +5,8 @@ ARG DOCKER_GEN_VERSION=0.14.7
 ARG TARGETARCH=amd64
 
 # docker package includes dockerd; supervisor runs multiple processes
-RUN apk add --no-cache docker supervisor wget
+RUN apk add --no-cache docker supervisor wget openssh-server openssh-keygen bash \
+ && sed -i '/^root:/s|:[^:]*$|:/bin/bash|' /etc/passwd
 
 # Install frpc
 RUN wget -q "https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/frp_${FRP_VERSION}_linux_${TARGETARCH}.tar.gz" \
@@ -20,7 +21,7 @@ RUN wget -q "https://github.com/nginx-proxy/docker-gen/releases/download/${DOCKE
     && tar -xzf /tmp/docker-gen.tar.gz -C /usr/local/bin \
     && rm /tmp/docker-gen.tar.gz
 
-RUN mkdir -p /etc/frpc /etc/supervisor/conf.d
+RUN mkdir -p /etc/frpc /etc/supervisor/conf.d /etc/ssh/host-keys
 
 COPY supervisord.sysbox.conf /etc/supervisor/conf.d/supervisord.conf
 COPY frpc.tmpl /etc/frpc/frpc.tmpl
@@ -28,16 +29,28 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY wait-for-docker.sh /usr/local/bin/wait-for-docker.sh
 COPY frpc-reload.sh /usr/local/bin/frpc-reload.sh
 COPY cleanup-stale-docker.sh /usr/local/bin/cleanup-stale-docker.sh
+COPY sshd-prepare.sh /usr/local/bin/sshd-prepare.sh
+COPY ssh-authorized-keys /usr/local/bin/ssh-authorized-keys
+COPY sshd_config /etc/ssh/sshd_config
 
 RUN sed -i 's/\r//' \
     /usr/local/bin/entrypoint.sh \
     /usr/local/bin/wait-for-docker.sh \
     /usr/local/bin/frpc-reload.sh \
     /usr/local/bin/cleanup-stale-docker.sh \
+    /usr/local/bin/sshd-prepare.sh \
+    /usr/local/bin/ssh-authorized-keys \
+    /etc/ssh/sshd_config \
  && chmod +x \
     /usr/local/bin/entrypoint.sh \
     /usr/local/bin/wait-for-docker.sh \
     /usr/local/bin/frpc-reload.sh \
-    /usr/local/bin/cleanup-stale-docker.sh
+    /usr/local/bin/cleanup-stale-docker.sh \
+    /usr/local/bin/sshd-prepare.sh \
+ && chown root:root /usr/local/bin/ssh-authorized-keys /etc/ssh/sshd_config \
+ && chmod 755 /usr/local/bin/ssh-authorized-keys \
+ && chmod 644 /etc/ssh/sshd_config
+
+EXPOSE 22
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

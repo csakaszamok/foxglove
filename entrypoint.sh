@@ -44,4 +44,9 @@ webServer.addr = "127.0.0.1"
 webServer.port = 7400
 EOF
 
+# Prepare sshd host keys. Never fatal: the sandbox must come up regardless.
+if [ -x /usr/local/bin/sshd-prepare.sh ]; then
+    /usr/local/bin/sshd-prepare.sh || echo "WARNING: sshd preparation failed" >&2
+fi
+
 exec supervisord -c /etc/supervisor/conf.d/supervisord.conf

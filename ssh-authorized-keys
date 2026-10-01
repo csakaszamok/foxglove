@@ -1,0 +1,6 @@
+#!/bin/sh
+# sshd AuthorizedKeysCommand: print the p7y-provided keys. A missing or empty
+# file prints nothing, so nobody can log in. Read on every login, so the file
+# can be replaced at runtime without restarting sshd.
+cat "${AUTHORIZED_KEYS_FILE:-/etc/instance/authorized_keys}" 2>/dev/null
+exit 0

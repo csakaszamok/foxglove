@@ -1,0 +1,32 @@
+# foxglove sshd: key-only root login, reached by the p7y gateway on port 22.
+Port 22
+ListenAddress 0.0.0.0
+
+# Host keys live in /etc/ssh/host-keys (p7y mounts a writable dir there so
+# fingerprints survive container re-creation); entrypoint.sh generates them.
+HostKey /etc/ssh/host-keys/ssh_host_ed25519_key
+HostKey /etc/ssh/host-keys/ssh_host_rsa_key
+HostKey /etc/ssh/host-keys/ssh_host_ecdsa_key
+
+PubkeyAuthentication yes
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin prohibit-password
+PermitEmptyPasswords no
+
+# Keys come only from the p7y-mounted /etc/instance/authorized_keys, read on
+# every login by a root-owned helper. This sidesteps StrictModes rejecting a
+# bind mount that shows up as 0777 / foreign-owned (Docker Desktop on Windows)
+# without turning StrictModes off for everything else.
+AuthorizedKeysFile none
+AuthorizedKeysCommand /usr/local/bin/ssh-authorized-keys
+AuthorizedKeysCommandUser root
+
+AllowTcpForwarding yes
+X11Forwarding no
+
+# sshd does not inherit the container env; make sure /usr/local/bin (docker)
+# is on PATH for non-login commands such as `ssh root@host docker ps`.
+SetEnv PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+Subsystem sftp internal-sftp
