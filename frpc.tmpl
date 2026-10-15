@@ -9,6 +9,16 @@ auth.token = "{{ env "FRP_TOKEN" }}"
 webServer.addr = "127.0.0.1"
 webServer.port = 7400
 
+# Readiness marker: present once docker-gen's config is applied, even when no
+# container publishes a port. stcp with a per-start random secret, so it is
+# never reachable and never listed among the HTTP proxies.
+[[proxies]]
+name = "{{ $instanceName }}.ready"
+type = "stcp"
+secretKey = "{{ env "FRPC_READY_SECRET" }}"
+localIP = "127.0.0.1"
+localPort = 1
+
 {{ range $container := . -}}
 {{- $rawName := trimPrefix "/" $container.Name -}}
 {{- $containerName := replace (replace (toLower $rawName) "/" "-" -1) "_" "-" -1 -}}
@@ -20,7 +30,10 @@ webServer.port = 7400
 {{- end -}}
 {{- $subdomain := index $container.Labels "frpc.subdomain" -}}
 {{- range $addr := $container.Addresses -}}
-{{- if and $addr.HostPort (eq $addr.Proto "tcp") -}}
+{{- /* Only ports published on all interfaces get a proxy; one published on
+       loopback (127.0.0.0/8, ::1) is private to the sandbox. */ -}}
+{{- $public := or (eq $addr.HostIP "") (eq $addr.HostIP "0.0.0.0") (eq $addr.HostIP "::") -}}
+{{- if and $addr.HostPort (eq $addr.Proto "tcp") $public -}}
 {{- if $subdomain }}
 [[proxies]]
 name = "{{ $instanceName }}-{{ $subdomain }}"

@@ -92,4 +92,4 @@ Three processes run under supervisord:
 2. **frpc** — frp client, connected to your frp server
 3. **docker-gen** — watches the Docker socket; whenever a container with published ports starts or stops, regenerates `/etc/frpc/frpc.toml` and hot-reloads frpc via its admin API
 
-Only ports published with `-p` are exposed. `EXPOSE`-only ports are ignored.
+Only ports published with `-p` on all interfaces (`-p 8080:80`, `-p 0.0.0.0:8080:80`) are exposed. Ports published on a loopback address (`-p 127.0.0.1:8080:80`, `-p [::1]:8080:80`) stay private to the environment and get no proxy. `EXPOSE`-only ports are ignored.

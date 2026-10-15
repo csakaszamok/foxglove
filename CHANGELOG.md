@@ -1,0 +1,31 @@
+# Changelog
+
+## 0.7.0
+
+### Changed (breaking)
+- Ports an inner container publishes on a loopback address (`-p 127.0.0.1:5678:5678`,
+  `127.x.x.x`, `[::1]`) no longer get an frp proxy: they are private to the sandbox.
+  Only ports published on all interfaces (`-p 5678:5678`, Docker's `HostIP` `""`,
+  `0.0.0.0` or `::`) are exposed, with the same proxy names as before.
+  A container whose ports are all on loopback gets no proxy, also with an
+  `frpc.subdomain` label. Stacks that relied on `127.0.0.1:` links must publish
+  on all interfaces instead.
+
+### Added
+- Readiness marker proxy `<instance>.ready` (type `stcp`, random secret, not
+  reachable). It is registered as soon as docker-gen's generated config is
+  applied, also when no port is exposed, so a healthcheck can use
+  `wget -qO- http://<frps>:7500/api/proxy/stcp | grep -q online` instead of
+  waiting for an HTTP proxy that may never come.
+
+### Known limitation
+- docker-gen reports only the first host binding of each container port. A
+  container port published both on loopback and on all interfaces
+  (`-p 127.0.0.1:5680:80 -p 5681:80`) may get no proxy for the all-interface
+  binding. Publish each container port one way only.
+
+## 0.6.0
+
+### Added
+- Key-only root SSH: `sshd` on port 22, keys from `/etc/instance/authorized_keys`
+  (re-read on every login), host keys persisted in `/etc/ssh/host-keys`.

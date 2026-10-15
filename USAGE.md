@@ -82,6 +82,7 @@ No labels, no extra config.
 | Plain `docker run` | `-p 8080:80 --name web` | `worker01-web-port8080.example.com` |
 | Compose stack `myapp`, service `api` | `-p 3000:3000` | `worker01-myapp-api-port3000.example.com` |
 | Multiple published ports | `-p 8080:80 -p 8443:443` | `worker01-web-port8080.example.com` + `worker01-web-port8443.example.com` |
+| Published on loopback | `-p 127.0.0.1:8080:80` | none — private to the environment |
 
 **Name sanitization rules:**
 - Non-alphanumeric characters → `-`
@@ -138,7 +139,7 @@ worker01-myapp-web-port5000.example.com
 - Inspect frpc logs: `docker exec foxglove supervisorctl tail frpc`
 
 **URL not generated after starting inner container:**
-- Verify the inner container was started with `-p` (published port, not just `EXPOSE`)
+- Verify the inner container was started with `-p` (published port, not just `EXPOSE`) on all interfaces — a port published on `127.0.0.1` gets no proxy
 - Check docker-gen logs: `docker exec foxglove supervisorctl tail docker-gen`
 - Check generated config: `docker exec foxglove cat /etc/frpc/frpc.toml`
 

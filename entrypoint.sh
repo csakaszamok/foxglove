@@ -31,6 +31,11 @@ for var in FRP_TOKEN BASE_DOMAIN; do
     fi
 done
 
+# Random per-start secret for frpc.tmpl's readiness marker (an stcp proxy
+# nobody should ever connect to)
+FRPC_READY_SECRET=$(od -An -N16 -tx1 /dev/urandom | tr -d ' \n')
+export FRPC_READY_SECRET
+
 # Generate initial frpc.toml so frpc can start before docker-gen produces its first run
 mkdir -p "$FRPC_CONFIG_DIR"
 cat > "$FRPC_CONFIG_DIR/frpc.toml" <<EOF
