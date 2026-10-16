@@ -32,7 +32,7 @@ docker run -d --runtime=sysbox-runc \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  csakaszamok/foxglove:5-sysbox
+  ghcr.io/p7y-dev/foxglove:0.7.0-sysbox
 ```
 
 **DinD variant (development / Windows):**
@@ -45,7 +45,7 @@ docker run -d --privileged \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  csakaszamok/foxglove:5-dind
+  ghcr.io/p7y-dev/foxglove:0.7.0-dind
 ```
 
 Or with Docker Compose — copy `docker-compose.example.yml` to `docker-compose.yml` and fill in the values.

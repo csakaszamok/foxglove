@@ -5,8 +5,8 @@
 # is exposed.
 #
 # Runs against the host Docker daemon. Usage:
-#   IMAGE=csakaszamok/foxglove:0.7.0-dind bash tests/test-private-ports.sh
-#   IMAGE=csakaszamok/foxglove:0.7.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/p7y-dev/foxglove:0.7.0-dind bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/p7y-dev/foxglove:0.7.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
 set -u
 export MSYS_NO_PATHCONV=1 # Git Bash on Windows: don't rewrite /etc/... args
 

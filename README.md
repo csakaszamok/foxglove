@@ -28,7 +28,7 @@ Docker image that automatically exposes every inner container's published ports 
      -e FRP_TOKEN=your-secret-token \
      -e BASE_DOMAIN=example.com \
      -v $(pwd)/instance-name:/etc/instance/name:ro \
-     csakaszamok/foxglove:5-sysbox
+     ghcr.io/p7y-dev/foxglove:0.7.0-sysbox
    ```
 
    **DinD (development / Windows):**
@@ -39,7 +39,7 @@ Docker image that automatically exposes every inner container's published ports 
      -e FRP_TOKEN=your-secret-token \
      -e BASE_DOMAIN=example.com \
      -v $(pwd)/instance-name:/etc/instance/name:ro \
-     csakaszamok/foxglove:5-dind
+     ghcr.io/p7y-dev/foxglove:0.7.0-dind
    ```
 
 3. Start any container inside with a published port:
@@ -93,3 +93,7 @@ Three processes run under supervisord:
 3. **docker-gen** — watches the Docker socket; whenever a container with published ports starts or stops, regenerates `/etc/frpc/frpc.toml` and hot-reloads frpc via its admin API
 
 Only ports published with `-p` on all interfaces (`-p 8080:80`, `-p 0.0.0.0:8080:80`) are exposed. Ports published on a loopback address (`-p 127.0.0.1:8080:80`, `-p [::1]:8080:80`) stay private to the environment and get no proxy. `EXPOSE`-only ports are ignored.
+
+## Releases
+
+Images are published to `ghcr.io/p7y-dev/foxglove:<version>-dind` and `:<version>-sysbox` by GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)) when a `v<version>` tag is pushed; the tag must match the `VERSION` file. Older releases remain on Docker Hub as `csakaszamok/foxglove`.

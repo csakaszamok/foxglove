@@ -1,24 +1,11 @@
 #!/bin/bash
-set -e
-
-VERSION=$(tr -d '[:space:]' < "$(dirname "$0")/VERSION")
-REGISTRY=${REGISTRY:-csakaszamok/foxglove}
-
-DIND_IMAGE="${REGISTRY}:${VERSION}-dind"
-DIND_LATEST="${REGISTRY}:latest-dind"
-SYSBOX_IMAGE="${REGISTRY}:${VERSION}-sysbox"
-SYSBOX_LATEST="${REGISTRY}:latest-sysbox"
-
-echo "==> Building DinD image: $DIND_IMAGE"
-docker build -t "$DIND_IMAGE" -t "$DIND_LATEST" -f Dockerfile.dind .
-
-echo "==> Building Sysbox image: $SYSBOX_IMAGE"
-docker build -t "$SYSBOX_IMAGE" -t "$SYSBOX_LATEST" -f Dockerfile.sysbox .
-
-echo "==> Pushing $DIND_IMAGE"
-docker push "$DIND_IMAGE"
-docker push "$DIND_LATEST"
-
-echo "==> Pushing $SYSBOX_IMAGE"
-docker push "$SYSBOX_IMAGE"
-docker push "$SYSBOX_LATEST"
+# DEPRECATED: images are no longer pushed by hand to Docker Hub.
+#
+# Releases are built by GitHub Actions (.github/workflows/release.yml) on a
+# v* tag and pushed to ghcr.io/p7y-dev/foxglove:<version>-dind / -sysbox.
+# To release: bump VERSION, commit, then
+#   git tag v<version> && git push origin v<version>
+#
+# The old csakaszamok/foxglove images on Docker Hub stay as they are.
+echo "upload-docker.sh is deprecated: push a v<version> tag; GitHub Actions publishes ghcr.io/p7y-dev/foxglove" >&2
+exit 1

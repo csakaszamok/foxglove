@@ -9,3 +9,6 @@ docker-compose.yml
 
 # internal planning docs
 docs/
+
+# Claude Code local settings
+.claude/

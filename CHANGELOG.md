@@ -10,6 +10,9 @@
   A container whose ports are all on loopback gets no proxy, also with an
   `frpc.subdomain` label. Stacks that relied on `127.0.0.1:` links must publish
   on all interfaces instead.
+- Images move to `ghcr.io/p7y-dev/foxglove:<version>-dind` / `-sysbox`, built by
+  GitHub Actions on a `v*` tag. The old `csakaszamok/foxglove` images stay on
+  Docker Hub; `upload-docker.sh` is deprecated.
 
 ### Added
 - Readiness marker proxy `<instance>.ready` (type `stcp`, random secret, not
