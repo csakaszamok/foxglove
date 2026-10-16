@@ -97,3 +97,7 @@ Only ports published with `-p` on all interfaces (`-p 8080:80`, `-p 0.0.0.0:8080
 ## Releases
 
 Images are published to `ghcr.io/p7y-dev/foxglove:<version>-dind` and `:<version>-sysbox` by GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)) when a `v<version>` tag is pushed; the tag must match the `VERSION` file. Older releases remain on Docker Hub as `csakaszamok/foxglove`.
+
+## License
+
+[Apache-2.0](LICENSE). If you redistribute foxglove, or a product built on it, keep the [NOTICE](NOTICE) file. The names "Purgatory" and "p7y" are not licensed for use as the name of another product.

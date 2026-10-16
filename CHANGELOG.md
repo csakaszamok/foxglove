@@ -13,6 +13,8 @@
 - Images move to `ghcr.io/p7y-dev/foxglove:<version>-dind` / `-sysbox`, built by
   GitHub Actions on a `v*` tag. The old `csakaszamok/foxglove` images stay on
   Docker Hub; `upload-docker.sh` is deprecated.
+- Licensed under Apache-2.0, with a NOTICE file; the names "Purgatory" and
+  "p7y" are not licensed for use as the name of another product.
 
 ### Added
 - Readiness marker proxy `<instance>.ready` (type `stcp`, random secret, not
