@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+### Added
+- `p7y.subdomain` label: names a container's proxy `<instance>-<subdomain>`, like
+  `frpc.subdomain`, which keeps working as its older name. When a container has
+  both, `p7y.subdomain` wins.
+
 ## 0.7.0
 
 ### Changed (breaking)

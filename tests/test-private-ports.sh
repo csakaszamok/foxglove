@@ -5,8 +5,8 @@
 # is exposed.
 #
 # Runs against the host Docker daemon. Usage:
-#   IMAGE=ghcr.io/p7y-dev/foxglove:0.7.0-dind bash tests/test-private-ports.sh
-#   IMAGE=ghcr.io/p7y-dev/foxglove:0.7.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/p7y-dev/foxglove:0.8.0-dind bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/p7y-dev/foxglove:0.8.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
 set -u
 export MSYS_NO_PATHCONV=1 # Git Bash on Windows: don't rewrite /etc/... args
 
@@ -106,6 +106,8 @@ inner --name echo-c -p 0.0.0.0:5680:5678 "$ECHO_IMAGE" -text=c
 inner --name echo-v6 -p '[::1]:5681:5678' -p 127.0.0.2:5682:5679 "$ECHO_IMAGE" -text=v6
 inner --name sub-priv -l frpc.subdomain=priv -p 127.0.0.1:5683:5678 "$ECHO_IMAGE" -text=priv
 inner --name sub-pub -l frpc.subdomain=pub -p 5684:5678 "$ECHO_IMAGE" -text=pub
+inner --name sub-new -l p7y.subdomain=new -p 5685:5678 "$ECHO_IMAGE" -text=new
+inner --name sub-both -l p7y.subdomain=both -l frpc.subdomain=old -p 5686:5678 "$ECHO_IMAGE" -text=both
 
 if wait_for "$TIMEOUT" online http "$INSTANCE-echo-b-port5679" && wait_for 10 online http "$INSTANCE-pub"; then
     pass "all-interface ports registered"
@@ -114,7 +116,7 @@ else
 fi
 sleep 3 # let any further (wrong) reload land before checking for absence
 names=$(proxy_names http | sort | tr '\n' ' ')
-expected="$INSTANCE-echo-b-port5679 $INSTANCE-echo-c-port5680 $INSTANCE-pub "
+expected="$INSTANCE-both $INSTANCE-echo-b-port5679 $INSTANCE-echo-c-port5680 $INSTANCE-new $INSTANCE-pub "
 if [ "$names" = "$expected" ]; then
     pass "HTTP proxies are exactly the all-interface ones: $names"
 else
@@ -126,6 +128,10 @@ online stcp "$INSTANCE.ready" && pass "readiness marker still online" || fail "r
     || fail "echo-b through frps (got: $(via_frps "$INSTANCE-echo-b-port5679"))"
 [ "$(via_frps "$INSTANCE-pub")" = pub ] && pass "frpc.subdomain container answers as $INSTANCE-pub" \
     || fail "$INSTANCE-pub through frps"
+[ "$(via_frps "$INSTANCE-new")" = new ] && pass "p7y.subdomain container answers as $INSTANCE-new" \
+    || fail "$INSTANCE-new through frps"
+[ "$(via_frps "$INSTANCE-both")" = both ] && pass "p7y.subdomain wins over frpc.subdomain" \
+    || fail "$INSTANCE-both through frps"
 for name in "$INSTANCE-echo-a-port5678" "$INSTANCE-priv" "$INSTANCE-echo-v6-port5681"; do
     out=$(via_frps "$name")
     case "$out" in

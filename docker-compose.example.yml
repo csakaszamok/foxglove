@@ -1,6 +1,6 @@
 services:
   foxglove:
-    image: ghcr.io/p7y-dev/foxglove:0.7.0-sysbox  # use :0.7.0-dind on Windows or without Sysbox — see README
+    image: ghcr.io/p7y-dev/foxglove:0.8.0-sysbox  # use :0.8.0-dind on Windows or without Sysbox — see README
     runtime: sysbox-runc                  # remove this line and add privileged: true for the dind variant
     environment:
       FRP_SERVER_ADDR: frp.example.com
