@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0
+
+### Changed (breaking)
+- Only the `p9m.subdomain` label names a container's proxy `<instance>-<subdomain>`;
+  `p7y.subdomain` and `frpc.subdomain` are ignored (the container gets its generated name).
+- foxglove is now the sandbox image of Purgatorium (p9m): images move to
+  `ghcr.io/csakaszamok/foxglove:<version>-dind` / `-sysbox`. 0.7.0 and 0.8.0 stay at
+  `ghcr.io/p7y-dev/foxglove`.
+
 ## 0.8.0
 
 ### Added

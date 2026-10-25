@@ -1,6 +1,6 @@
 #!/bin/sh
 # Prepare sshd before supervisord starts it: make sure host keys exist in
-# $SSH_HOST_KEY_DIR (p7y mounts a writable dir there so fingerprints persist;
+# $SSH_HOST_KEY_DIR (p9m mounts a writable dir there so fingerprints persist;
 # without a mount they land in the container's own filesystem).
 HOST_KEY_DIR=${SSH_HOST_KEY_DIR:-/etc/ssh/host-keys}
 FALLBACK_DIR=${SSH_HOST_KEY_FALLBACK_DIR:-/run/ssh-host-keys}

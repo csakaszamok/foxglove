@@ -1,6 +1,6 @@
 name: release
 
-# Builds and pushes ghcr.io/p7y-dev/foxglove:<version>-dind and :<version>-sysbox.
+# Builds and pushes ghcr.io/csakaszamok/foxglove:<version>-dind and :<version>-sysbox.
 # Runs on a v* tag push. Can also be started by hand for an existing tag
 # (e.g. one created before this workflow existed): the workflow definition
 # comes from the branch it is started on, the image is built from the tag.
@@ -18,7 +18,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE: ghcr.io/p7y-dev/foxglove
+  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   release:

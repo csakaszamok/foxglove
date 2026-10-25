@@ -1,5 +1,5 @@
 #!/bin/bash
-# Integration test: key-only root SSH into a foxglove sandbox, as the p7y
+# Integration test: key-only root SSH into a foxglove sandbox, as the p9m
 # gateway reaches it (port 22 on a shared docker network).
 #   - login with the authorized key works and `docker ps` uses the inner dockerd
 #   - password / keyboard-interactive and a wrong key are refused
@@ -8,7 +8,7 @@
 #   - replacing authorized_keys at runtime takes effect without a restart
 #
 # Runs against the host Docker daemon. Usage:
-#   IMAGE=ghcr.io/p7y-dev/foxglove:0.8.0-dind bash tests/test-ssh.sh
+#   IMAGE=ghcr.io/csakaszamok/foxglove:0.9.0-dind bash tests/test-ssh.sh
 set -u
 export MSYS_NO_PATHCONV=1 # Git Bash on Windows: don't rewrite /etc/... args
 
@@ -125,7 +125,7 @@ else
     fail "wrong key refused (got: $out)"
 fi
 
-# --- ~/.ssh/authorized_keys is not a back door (only the p7y file counts)
+# --- ~/.ssh/authorized_keys is not a back door (only the p9m file counts)
 docker exec "$FOX" sh -c "mkdir -p /root/.ssh && echo '$(cat "$WORK/keys/wrong.pub")' > /root/.ssh/authorized_keys && chmod 700 /root/.ssh && chmod 600 /root/.ssh/authorized_keys"
 out=$(ssh_as wrong "$FOX" true)
 if echo "$out" | grep -q 'Permission denied'; then

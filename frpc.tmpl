@@ -28,8 +28,8 @@ localPort = 1
 {{- range $net := $container.Networks -}}
 {{- if not $ip -}}{{- $ip = $net.IP -}}{{- end -}}
 {{- end -}}
-{{- /* p7y.subdomain names the proxy; frpc.subdomain is its older name, used when p7y.subdomain is not set. */ -}}
-{{- $subdomain := or (index $container.Labels "p7y.subdomain") (index $container.Labels "frpc.subdomain") -}}
+{{- /* p9m.subdomain names the proxy. */ -}}
+{{- $subdomain := index $container.Labels "p9m.subdomain" -}}
 {{- range $addr := $container.Addresses -}}
 {{- /* Only ports published on all interfaces get a proxy; one published on
        loopback (127.0.0.0/8, ::1) is private to the sandbox. */ -}}

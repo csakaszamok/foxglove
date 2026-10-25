@@ -32,7 +32,7 @@ docker run -d --runtime=sysbox-runc \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  ghcr.io/p7y-dev/foxglove:0.8.0-sysbox
+  ghcr.io/csakaszamok/foxglove:0.9.0-sysbox
 ```
 
 **DinD variant (development / Windows):**
@@ -45,7 +45,7 @@ docker run -d --privileged \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  ghcr.io/p7y-dev/foxglove:0.8.0-dind
+  ghcr.io/csakaszamok/foxglove:0.9.0-dind
 ```
 
 Or with Docker Compose — copy `docker-compose.example.yml` to `docker-compose.yml` and fill in the values.
@@ -83,10 +83,10 @@ No labels, no extra config.
 | Compose stack `myapp`, service `api` | `-p 3000:3000` | `worker01-myapp-api-port3000.example.com` |
 | Multiple published ports | `-p 8080:80 -p 8443:443` | `worker01-web-port8080.example.com` + `worker01-web-port8443.example.com` |
 | Published on loopback | `-p 127.0.0.1:8080:80` | none — private to the environment |
-| `p7y.subdomain` label | `-p 8080:80 -l p7y.subdomain=shop` | `worker01-shop.example.com` (instead of the generated name) |
+| `p9m.subdomain` label | `-p 8080:80 -l p9m.subdomain=shop` | `worker01-shop.example.com` (instead of the generated name) |
 
-`p7y.subdomain` replaces the generated name with `{instance-name}-{subdomain}`. Its older
-name, `frpc.subdomain`, still works; when a container has both, `p7y.subdomain` wins.
+`p9m.subdomain` replaces the generated name with `{instance-name}-{subdomain}`. No other
+label does: `p7y.subdomain` and `frpc.subdomain` (names before 0.9.0) are ignored.
 
 **Name sanitization rules:**
 - Non-alphanumeric characters → `-`

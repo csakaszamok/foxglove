@@ -1,8 +1,8 @@
-# foxglove sshd: key-only root login, reached by the p7y gateway on port 22.
+# foxglove sshd: key-only root login, reached by the p9m gateway on port 22.
 Port 22
 ListenAddress 0.0.0.0
 
-# Host keys live in /etc/ssh/host-keys (p7y mounts a writable dir there so
+# Host keys live in /etc/ssh/host-keys (p9m mounts a writable dir there so
 # fingerprints survive container re-creation); entrypoint.sh generates them.
 HostKey /etc/ssh/host-keys/ssh_host_ed25519_key
 HostKey /etc/ssh/host-keys/ssh_host_rsa_key
@@ -14,7 +14,7 @@ KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password
 PermitEmptyPasswords no
 
-# Keys come only from the p7y-mounted /etc/instance/authorized_keys, read on
+# Keys come only from the p9m-mounted /etc/instance/authorized_keys, read on
 # every login by a root-owned helper. This sidesteps StrictModes rejecting a
 # bind mount that shows up as 0777 / foreign-owned (Docker Desktop on Windows)
 # without turning StrictModes off for everything else.
