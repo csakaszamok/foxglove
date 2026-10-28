@@ -4,8 +4,9 @@ ARG FRP_VERSION=0.61.0
 ARG DOCKER_GEN_VERSION=0.14.7
 ARG TARGETARCH=amd64
 
-# docker package includes dockerd; supervisor runs multiple processes
-RUN apk add --no-cache docker supervisor wget openssh-server openssh-keygen bash \
+# docker package includes dockerd; docker compose (with buildx for build:) runs a stack inside, as in -dind;
+# supervisor runs multiple processes
+RUN apk add --no-cache docker docker-cli-compose docker-cli-buildx supervisor wget openssh-server openssh-keygen bash \
  && sed -i '/^root:/s|:[^:]*$|:/bin/bash|' /etc/passwd
 
 # Install frpc

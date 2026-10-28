@@ -28,7 +28,7 @@ Docker image that automatically exposes every inner container's published ports 
      -e FRP_TOKEN=your-secret-token \
      -e BASE_DOMAIN=example.com \
      -v $(pwd)/instance-name:/etc/instance/name:ro \
-     ghcr.io/csakaszamok/foxglove:0.9.0-sysbox
+     ghcr.io/csakaszamok/foxglove:0.10.0-sysbox
    ```
 
    **DinD (development / Windows):**
@@ -39,7 +39,7 @@ Docker image that automatically exposes every inner container's published ports 
      -e FRP_TOKEN=your-secret-token \
      -e BASE_DOMAIN=example.com \
      -v $(pwd)/instance-name:/etc/instance/name:ro \
-     ghcr.io/csakaszamok/foxglove:0.9.0-dind
+     ghcr.io/csakaszamok/foxglove:0.10.0-dind
    ```
 
 3. Start any container inside with a published port:

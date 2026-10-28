@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.10.0
+
+### Added
+- The `-sysbox` image has `docker compose` and `docker buildx`, as `-dind` does: a stack
+  can be brought up inside the sandbox (`docker compose up`), with `build:` too.
+
 ## 0.9.0
 
 ### Changed (breaking)
