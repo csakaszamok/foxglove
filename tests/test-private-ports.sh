@@ -5,8 +5,8 @@
 # is exposed.
 #
 # Runs against the host Docker daemon. Usage:
-#   IMAGE=ghcr.io/csakaszamok/foxglove:0.9.0-dind bash tests/test-private-ports.sh
-#   IMAGE=ghcr.io/csakaszamok/foxglove:0.9.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/csakaszamok/foxglove:0.11.0-dind bash tests/test-private-ports.sh
+#   IMAGE=ghcr.io/csakaszamok/foxglove:0.11.0-sysbox RUN_OPTS="--runtime=sysbox-runc" bash tests/test-private-ports.sh
 set -u
 export MSYS_NO_PATHCONV=1 # Git Bash on Windows: don't rewrite /etc/... args
 
@@ -122,6 +122,18 @@ else
     fail "HTTP proxies: got '$names', want '$expected'"
 fi
 online stcp "$INSTANCE.ready" && pass "readiness marker still online" || fail "readiness marker gone"
+
+# TCP: the sandbox's SSH and Docker, and every all-interface port on its own number (Purgatorium's TCP addresses)
+names=$(proxy_names tcp | sort | tr '
+' ' ')
+expected="$INSTANCE.docker $INSTANCE.ssh $INSTANCE.tcp-5679 $INSTANCE.tcp-5680 $INSTANCE.tcp-5684 $INSTANCE.tcp-5686 "
+if [ "$names" = "$expected" ]; then
+    pass "TCP proxies are SSH, Docker and the all-interface ports: $names"
+else
+    fail "TCP proxies: got '$names', want '$expected'"
+fi
+[ "$(fetch "http://$FRPS:5679/")" = b ] && pass "echo-b answers on frps:5679 (tcp)" || fail "echo-b on frps:5679 (tcp)"
+fetch "http://$FRPS:5678/" >/dev/null && fail "the loopback-published 5678 is reachable on frps" || pass "the loopback-published 5678 is not on frps"
 
 [ "$(via_frps "$INSTANCE-echo-b-port5679")" = b ] && pass "echo-b answers through frps" \
     || fail "echo-b through frps (got: $(via_frps "$INSTANCE-echo-b-port5679"))"
