@@ -19,6 +19,22 @@ secretKey = "{{ env "FRPC_READY_SECRET" }}"
 localIP = "127.0.0.1"
 localPort = 1
 
+# The sandbox's own SSH and Docker (TLS) for Purgatorium, which reaches them on
+# frps (the sandbox is on no network it shares with other sandboxes)
+[[proxies]]
+name = "{{ $instanceName }}.ssh"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 22
+remotePort = 22
+
+[[proxies]]
+name = "{{ $instanceName }}.docker"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 2376
+remotePort = 2376
+
 {{ range $container := . -}}
 {{- $rawName := trimPrefix "/" $container.Name -}}
 {{- $containerName := replace (replace (toLower $rawName) "/" "-" -1) "_" "-" -1 -}}
@@ -56,7 +72,13 @@ type = "http"
 localIP = "{{ $ip }}"
 localPort = {{ $addr.Port }}
 customDomains = ["{{ $instanceName }}-{{ $containerName }}-port{{ $addr.HostPort }}.{{ $baseDomain }}"]
+{{ end }}
+[[proxies]]
+name = "{{ $instanceName }}.tcp-{{ $addr.HostPort }}"
+type = "tcp"
+localIP = "{{ $ip }}"
+localPort = {{ $addr.Port }}
+remotePort = {{ $addr.HostPort }}
 {{ end -}}
-{{- end -}}
 {{- end -}}
 {{- end }}

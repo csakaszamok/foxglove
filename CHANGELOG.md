@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.0
+
+### Added
+- frpc registers tcp proxies besides the http ones: `<instance>.ssh` (port 22) and
+  `<instance>.docker` (2376, dockerd's TLS) to the same port on frps, and
+  `<instance>.tcp-<port>` for every port published on all interfaces, on its own
+  number. With them everything into the sandbox can go through its tunnel, so the
+  sandbox container needs no network shared with anything else. frps's own ports
+  must then be out of the way of the published ones (Purgatorium uses 65000,
+  65080 and 65075; `FRP_SERVER_PORT` names the first).
+
 ## 0.10.0
 
 ### Added

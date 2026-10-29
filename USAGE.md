@@ -32,7 +32,7 @@ docker run -d --runtime=sysbox-runc \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  ghcr.io/csakaszamok/foxglove:0.10.0-sysbox
+  ghcr.io/csakaszamok/foxglove:0.11.0-sysbox
 ```
 
 **DinD variant (development / Windows):**
@@ -45,7 +45,7 @@ docker run -d --privileged \
   -e BASE_DOMAIN=example.com \
   -v $(pwd)/instance-name:/etc/instance/name:ro \
   -v foxglove-data:/var/lib/docker \
-  ghcr.io/csakaszamok/foxglove:0.10.0-dind
+  ghcr.io/csakaszamok/foxglove:0.11.0-dind
 ```
 
 Or with Docker Compose — copy `docker-compose.example.yml` to `docker-compose.yml` and fill in the values.
@@ -87,6 +87,12 @@ No labels, no extra config.
 
 `p9m.subdomain` replaces the generated name with `{instance-name}-{subdomain}`. No other
 label does: `p7y.subdomain` and `frpc.subdomain` (names before 0.9.0) are ignored.
+
+Every port published on all interfaces also gets a **tcp proxy** on frps, on its own
+number (`{instance-name}.tcp-{port}`), and the environment's own SSH and Docker get
+`{instance-name}.ssh` (22) and `{instance-name}.docker` (2376): anything can reach the
+environment through frps alone. Keep frps's own ports (`bindPort`, `vhostHTTPPort`, its
+dashboard) away from the ports the apps publish.
 
 **Name sanitization rules:**
 - Non-alphanumeric characters → `-`
