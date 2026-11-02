@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0
+
+### Security
+- The `-sysbox` image is built on Alpine 3.22: runc 1.3, containerd 2.1 and Docker 28. On Alpine 3.21 it had runc
+  1.2.2 (CVE-2025-31133, CVE-2025-52565, CVE-2025-52881: a container in the sandbox could break out into the
+  sandbox), containerd 2.0.0 (CVE-2024-40635) and Docker 27, which gets no more fixes. OpenSSH 10.0.
+- The `-dind` image stays on `docker:dind` (Docker 29, runc 1.5): rebuilt, nothing else changes. Not pinned to an older
+  Docker: Docker 29 keeps images in containerd's store, which an older dockerd would not see in a sandbox made before.
+
 ## 0.11.0
 
 ### Added
