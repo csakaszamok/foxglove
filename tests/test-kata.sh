@@ -62,11 +62,8 @@ inner_up() { docker exec "$SB" docker info >/dev/null 2>&1; }
 logins() { docker logs "$SB" 2>&1 | grep -c 'login to server success'; }
 
 printf '.:53 {\n  forward . 127.0.0.11\n  cache 5\n  errors\n}\n' > "$W/Corefile"
-printf 'bindPort = 7000
-printf 'bindPort = 7000
-auth.method = "token"
-auth.token = "t"
-' > "$W/frps.toml"
+printf 'bindPort = 7000\nauth.method = "token"\nauth.token = "t"\n' > "$W/frps.toml"
+echo kata > "$W/name"
 cat > "$W/compose.yaml" <<YAML
 services:
   dns:
