@@ -10,7 +10,7 @@ Docker image that automatically exposes every inner container's published ports 
 | `0.13.0-dind` | `docker:dind` | Docker-in-Docker | `--privileged` | Development, Windows, or hosts without Sysbox |
 | `0.13.0-kata` | `docker:dind` | [Kata Containers](https://katacontainers.io/) guest (own kernel) | KVM and a `kata` runtime in Docker; see USAGE | Hosts that run Kata instead of Sysbox |
 
-**Sysbox is the recommended variant** — it runs without `--privileged`, which is safer for production environments. Use the `dind` variant on Windows or on Linux hosts where installing Sysbox is not an option.
+**Sysbox is the recommended variant** — it runs without `--privileged`, which is safer for production environments. The `-kata` variant also runs without `--privileged` (in its own VM; needs KVM and Kata). Use the `dind` variant on Windows or on Linux hosts where installing Sysbox is not an option.
 
 ## Quick Start
 

@@ -55,9 +55,16 @@ docker run -d --runtime kata   --cap-add ALL   --security-opt seccomp=unconfined
 ```
 
 `DNS_SERVER` is the IP of a DNS server the guest can reach (for example a CoreDNS container on the same network;
-`10.0.0.2` is a placeholder). Docker's embedded DNS (127.0.0.11) is not reachable from a Kata guest. At startup
-`kata-prepare.sh` writes it to `/etc/resolv.conf` and remounts `/sys` and `/sys/fs/cgroup` read-write; if cgroup stays
-read-only, the container exits with an error.
+`10.0.0.2` is a placeholder). Docker's embedded DNS (127.0.0.11) is not reachable from a Kata guest. At startup, when
+`DNS_SERVER` is set, `kata-prepare.sh` writes it to `/etc/resolv.conf`; it also remounts `/sys` and `/sys/fs/cgroup`
+read-write, and if cgroup stays read-only, the container exits with an error. The DNS sidecar must sit at a fixed IP on
+a user-defined network; the compose project in `tests/test-kata.sh` is a worked example.
+
+**Host requirements (Kata variant):** Kata 4.3.1 or newer with the Cloud Hypervisor runtime-rs config, where
+`virtio_fs_extra_args` includes `"--xattr", "--xattrmap=:map::user.virtiofs.:", "--modcaps=-mknod:-setfcap"` (exactly one
+`--modcaps`); host kernel 5.8 or newer; and Docker's data root mounted `nosuid,nodev` (self-bind mounts of
+`/var/lib/docker` and `/var/lib/containerd`, not `noexec`). Why: virtiofsd maps guest root to host root, so without
+these a sandbox's root can plant device nodes and setuid-root files on host volumes. p9m's install script sets this up.
 
 Or with Docker Compose — copy `docker-compose.example.yml` to `docker-compose.yml` and fill in the values.
 

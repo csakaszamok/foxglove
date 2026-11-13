@@ -18,6 +18,8 @@ if [ -n "${DNS_SERVER:-}" ]; then
     umount "$RESOLV_CONF" 2>/dev/null || true
     printf 'nameserver %s\noptions ndots:0\n' "$DNS_SERVER" > "$RESOLV_CONF"
     echo "kata-prepare: resolv.conf uses $DNS_SERVER"
+elif grep -q '127\.0\.0\.11' "$RESOLV_CONF" 2>/dev/null; then
+    echo "kata-prepare: warning: $RESOLV_CONF uses Docker's embedded DNS (127.0.0.11), unreachable from a Kata guest; set DNS_SERVER to a DNS sidecar" >&2
 fi
 
 if mount -o remount,rw "$SYS_DIR"; then
@@ -48,7 +50,7 @@ if ! cgroup_writable; then
         fi
     fi
     if [ "$fixed" = 0 ] || ! cgroup_writable; then
-        echo "kata-prepare: /sys/fs/cgroup is not writable ($CGROUP_DIR)" >&2
+        echo "kata-prepare: /sys/fs/cgroup is not writable ($CGROUP_DIR); run the image with --runtime kata and the documented flags (see USAGE.md)" >&2
         exit 1
     fi
 fi

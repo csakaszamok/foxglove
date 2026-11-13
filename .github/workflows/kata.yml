@@ -1,5 +1,6 @@
 # The -kata image under Kata Containers (Cloud Hypervisor) on a runner with KVM.
-# The Kata install and config edits mirror p9m's scripts/install-kata.sh; keep the two in sync.
+# The Kata install, config edits and hardened data root mirror the host setup p9m's install script will apply
+# (that script does not exist yet); keep the two in sync once it does.
 name: kata
 
 on:
@@ -19,6 +20,11 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Unit tests
+        run: |
+          sh tests/test-kata-prepare.sh
+          sh tests/test-validation.sh
 
       - name: KVM on the runner
         run: |
@@ -57,7 +63,18 @@ jobs:
           sudo jq --arg shim "$SHIM" '.runtimes.kata = {runtimeType: $shim}' /etc/docker/daemon.json | sudo tee /tmp/daemon.json
           sudo mv /tmp/daemon.json /etc/docker/daemon.json
           sudo systemctl daemon-reload
-          sudo systemctl restart containerd docker
+          # hardened data root: virtiofsd maps guest root to host root, so volumes must not honour device nodes or suid
+          sudo systemctl stop docker docker.socket containerd
+          for d in /var/lib/docker /var/lib/containerd; do
+            sudo mkdir -p "$d"
+            sudo mount --bind "$d" "$d"
+            sudo mount -o remount,bind,nosuid,nodev "$d" "$d"
+          done
+          sudo systemctl start containerd docker
+          for d in /var/lib/docker /var/lib/containerd; do
+            findmnt -no OPTIONS --target "$d" | grep -q nosuid
+            findmnt -no OPTIONS --target "$d" | grep -q nodev
+          done
           docker info -f '{{json .Runtimes}}'
 
       - name: Build the -kata image
@@ -66,7 +83,11 @@ jobs:
       - name: Integration test under Kata
         run: IMAGE=foxglove:kata-ci bash tests/test-kata.sh
 
-      - name: Unit tests
+      - name: Dump containers on failure
+        if: failure()
         run: |
-          sh tests/test-kata-prepare.sh
-          sh tests/test-validation.sh
+          docker ps -a
+          for c in $(docker ps -aq --filter name=fgkata); do
+            echo "=== logs: $(docker inspect -f '{{.Name}}' "$c")"
+            docker logs --tail 200 "$c" 2>&1 || true
+          done

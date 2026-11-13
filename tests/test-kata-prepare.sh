@@ -62,6 +62,17 @@ else
     fail "dns unset leaves resolv.conf (rc=$rc, calls: $(cat "$TMPDIR/calls"))"
 fi
 
+# Test: warning when resolv.conf uses Docker's embedded DNS and DNS_SERVER is unset
+reset_cgroup
+printf 'nameserver 127.0.0.11
+' > "$TMPDIR/resolv.conf"
+rc=0; (unset DNS_SERVER; run_kp) || rc=$?
+if [ "$rc" = 0 ] && grep -q 'warning.*127.0.0.11.*DNS_SERVER' "$TMPDIR/stderr" && [ "$(cat "$TMPDIR/resolv.conf")" = "nameserver 127.0.0.11" ]; then
+    pass "embedded DNS warning"
+else
+    fail "embedded DNS warning (rc=$rc, stderr: $(cat "$TMPDIR/stderr"))"
+fi
+
 # Test: umount failure tolerated
 reset_cgroup
 rm -f "$TMPDIR/resolv.conf"
