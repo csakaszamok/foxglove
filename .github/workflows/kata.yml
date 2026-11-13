@@ -1,0 +1,66 @@
+# The -kata image under Kata Containers (Cloud Hypervisor) on a runner with KVM.
+# The Kata install and config edits mirror p9m's scripts/install-kata.sh; keep the two in sync.
+name: kata
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, "feat/**"]
+
+permissions:
+  contents: read
+
+env:
+  KATA_VERSION: 4.3.1
+
+jobs:
+  kata:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: KVM on the runner
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo modprobe vhost_vsock vhost_net
+          ls -l /dev/kvm /dev/vhost-vsock /dev/vhost-net
+
+      - name: Install Kata
+        run: |
+          set -eux
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq zstd jq
+          curl -fsSL -o /tmp/kata.tar.zst "https://github.com/kata-containers/kata-containers/releases/download/$KATA_VERSION/kata-static-$KATA_VERSION-amd64.tar.zst"
+          sudo tar --zstd -xf /tmp/kata.tar.zst -C /
+          SHIM=$(find /opt/kata -path '*runtime-rs*' -name containerd-shim-kata-v2 \( -type f -o -type l \) | head -1)
+          CFG=/opt/kata/share/defaults/kata-containers/runtime-rs/configuration-clh-runtime-rs.toml
+          test -n "$SHIM" && test -f "$CFG"
+          # Kata 4.3 rejects configs outside its shipped set, so edit the shipped file in place
+          sudo rm -f /etc/kata-containers/configuration.toml /etc/kata-containers/runtime-rs/configuration.toml
+          sudo sed -i -E 's/^#?\s*static_sandbox_resource_mgmt\s*=.*/static_sandbox_resource_mgmt = false/' "$CFG"
+          sudo sed -i -E 's/^default_memory\s*=.*/default_memory = 512/' "$CFG"
+          sudo sed -i -E 's/^#?\s*sandbox_cgroup_only\s*=.*/sandbox_cgroup_only = true/' "$CFG"
+          sudo sed -i -E 's/^(virtio_fs_extra_args\s*=\s*\[)/\1"--xattr", "--xattrmap=:map::user.virtiofs.:", "--modcaps=-mknod:-setfcap", /' "$CFG"
+          grep -nE '^\s*(static_sandbox_resource_mgmt|default_memory|sandbox_cgroup_only|virtio_fs_extra_args)\s*=' "$CFG"
+          sudo ln -sf "$(basename "$CFG")" "$(dirname "$CFG")/configuration.toml"
+          sudo ln -sf "$SHIM" /usr/local/bin/containerd-shim-kata-v2
+          [ -s /etc/docker/daemon.json ] || echo '{}' | sudo tee /etc/docker/daemon.json
+          sudo jq --arg shim "$SHIM" '.runtimes.kata = {runtimeType: $shim}' /etc/docker/daemon.json | sudo tee /tmp/daemon.json
+          sudo mv /tmp/daemon.json /etc/docker/daemon.json
+          sudo systemctl daemon-reload
+          sudo systemctl restart containerd docker
+          docker info -f '{{json .Runtimes}}'
+
+      - name: Build the -kata image
+        run: docker build -f Dockerfile.kata -t foxglove:kata-ci .
+
+      - name: Integration test under Kata
+        run: IMAGE=foxglove:kata-ci bash tests/test-kata.sh
+
+      - name: Unit tests
+        run: |
+          sh tests/test-kata-prepare.sh
+          sh tests/test-validation.sh
