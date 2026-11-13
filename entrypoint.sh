@@ -54,4 +54,9 @@ if [ -x /usr/local/bin/sshd-prepare.sh ]; then
     /usr/local/bin/sshd-prepare.sh || echo "WARNING: sshd preparation failed" >&2
 fi
 
+
+# Kata guest preparation (DNS, /sys, cgroups). Fatal: a half-prepared guest must not start.
+KATA_PREPARE="${KATA_PREPARE:-/usr/local/bin/kata-prepare.sh}"
+if [ -x "$KATA_PREPARE" ]; then "$KATA_PREPARE"; fi
+
 exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
