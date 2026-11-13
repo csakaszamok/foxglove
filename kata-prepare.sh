@@ -35,12 +35,19 @@ cgroup_writable() {
 }
 
 if ! cgroup_writable; then
+    fixed=0
     if mount -o remount,rw "$CGROUP_DIR" 2>/dev/null; then
         echo "kata-prepare: remounted $CGROUP_DIR read-write"
-    elif umount "$CGROUP_DIR" 2>/dev/null && mount -t cgroup2 cgroup2 "$CGROUP_DIR" 2>/dev/null; then
-        echo "kata-prepare: mounted a fresh cgroup2 on $CGROUP_DIR"
+        fixed=1
+    else
+        # A failed fallback must be fatal: after umount alone, the probe would succeed on the plain directory
+        umount "$CGROUP_DIR" 2>/dev/null || true
+        if mount -t cgroup2 cgroup2 "$CGROUP_DIR" 2>/dev/null; then
+            echo "kata-prepare: mounted a fresh cgroup2 on $CGROUP_DIR"
+            fixed=1
+        fi
     fi
-    if ! cgroup_writable; then
+    if [ "$fixed" = 0 ] || ! cgroup_writable; then
         echo "kata-prepare: /sys/fs/cgroup is not writable ($CGROUP_DIR)" >&2
         exit 1
     fi

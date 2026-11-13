@@ -15,12 +15,17 @@ mkdir -p "$TMPDIR/bin"
 cat > "$TMPDIR/bin/mount" <<'M'
 #!/bin/sh
 echo "mount $*" >> "$TMPDIR/calls"
+if [ "${MOUNT_FAIL_CG:-}" = 1 ]; then
+    case "$*" in *"$CGROUP_DIR"*) exit 1 ;; esac
+fi
 if [ "${MOUNT_FIX:-}" = 1 ] && [ "$*" = "-o remount,rw $CGROUP_DIR" ]; then chmod 755 "$CGROUP_DIR"; fi
 exit 0
 M
 cat > "$TMPDIR/bin/umount" <<'M'
 #!/bin/sh
 echo "umount $*" >> "$TMPDIR/calls"
+# UMOUNT_PLAIN=1: after unmounting, the dir is a plain writable directory (as on the guest rootfs)
+if [ "${UMOUNT_PLAIN:-}" = 1 ] && [ "$*" = "$CGROUP_DIR" ]; then chmod 755 "$CGROUP_DIR"; fi
 exit "${UMOUNT_RC:-0}"
 M
 chmod +x "$TMPDIR/bin/mount" "$TMPDIR/bin/umount"
@@ -88,7 +93,17 @@ fi
 if [ "$IS_ROOT" = 1 ]; then
     echo "SKIP: cgroup read-only then fixed (root ignores chmod 555)"
     echo "SKIP: cgroup stays read-only: exit 1 (root ignores chmod 555)"
+    echo "SKIP: cgroup fallback mount fails: exit 1 (root ignores chmod 555)"
 else
+    # Test: fallback umount succeeds (leaving a plain writable dir) but mount -t cgroup2 fails: exit 1
+    reset_cgroup; chmod 555 "$TMPDIR/cgroup"
+    rc=0; MOUNT_FAIL_CG=1 UMOUNT_PLAIN=1 run_kp || rc=$?
+    if [ "$rc" = 1 ] && grep -qF "($TMPDIR/cgroup)" "$TMPDIR/stderr"; then
+        pass "cgroup fallback mount fails: exit 1"
+    else
+        fail "cgroup fallback mount fails: exit 1 (rc=$rc, stderr: $(cat "$TMPDIR/stderr"))"
+    fi
+
     # Test: cgroup read-only then fixed
     reset_cgroup; chmod 555 "$TMPDIR/cgroup"
     rc=0; MOUNT_FIX=1 run_kp || rc=$?
