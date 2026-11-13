@@ -45,6 +45,12 @@ jobs:
           sudo sed -i -E 's/^#?\s*sandbox_cgroup_only\s*=.*/sandbox_cgroup_only = true/' "$CFG"
           sudo sed -i -E 's/^(virtio_fs_extra_args\s*=\s*\[)/\1"--xattr", "--xattrmap=:map::user.virtiofs.:", "--modcaps=-mknod:-setfcap", /' "$CFG"
           grep -nE '^\s*(static_sandbox_resource_mgmt|default_memory|sandbox_cgroup_only|virtio_fs_extra_args)\s*=' "$CFG"
+          # a sed that matched nothing must fail the step, not pass silently
+          grep -qx 'static_sandbox_resource_mgmt = false' "$CFG"
+          grep -qx 'default_memory = 512' "$CFG"
+          grep -qx 'sandbox_cgroup_only = true' "$CFG"
+          grep -q -- '"--xattr", "--xattrmap=:map::user.virtiofs.:", "--modcaps=-mknod:-setfcap"' "$CFG"
+          [ "$(grep -c -- '--modcaps' "$CFG")" -eq 1 ]
           sudo ln -sf "$(basename "$CFG")" "$(dirname "$CFG")/configuration.toml"
           sudo ln -sf "$SHIM" /usr/local/bin/containerd-shim-kata-v2
           [ -s /etc/docker/daemon.json ] || echo '{}' | sudo tee /etc/docker/daemon.json
