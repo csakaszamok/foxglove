@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.13.0
+
+### Added
+- A `-kata` image for Kata Containers guests (`ghcr.io/csakaszamok/foxglove:<version>-kata`), built like `-dind` and run
+  without `--privileged`: `--runtime kata --cap-add ALL`, seccomp, AppArmor and systempaths unconfined, and
+  `--device-cgroup-rule 'a *:* rwm'`. Needs KVM and a `kata` runtime registered in Docker.
+- `kata-prepare.sh`, run by the entrypoint before supervisord when present: writes `/etc/resolv.conf` from `DNS_SERVER`
+  (`nameserver` plus `options ndots:0`; Docker's embedded DNS at 127.0.0.11 is unreachable from a Kata guest, so set
+  `DNS_SERVER` to the IP of a DNS container on the same network) and remounts `/sys` and `/sys/fs/cgroup` read-write.
+  If cgroup cannot be made writable, startup fails (exit 1) instead of running a dockerd that cannot start containers.
+  `KATA_PREPARE` overrides the script's path.
+
 ## 0.12.0
 
 ### Security
