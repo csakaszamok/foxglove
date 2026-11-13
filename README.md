@@ -101,4 +101,4 @@ Images are published to `ghcr.io/csakaszamok/foxglove:<version>-dind`, `:<versio
 
 ## License
 
-[Apache-2.0](LICENSE). If you redistribute foxglove, or a product built on it, keep the [NOTICE](NOTICE) file. The names "Purgatorium" and "p9m" are not licensed for use as the name of another product.
+[AGPL-3.0](LICENSE) (AGPL-3.0-only), with the additional terms in [NOTICE](NOTICE): a product built on foxglove says so in its docs, is marked as changed, and does not take the names "Purgatorium" or "p9m". Free to use, also commercially; changed it and people use it over the network? Then they get your changed source too. Versions up to 0.12.0 were released under Apache-2.0 and stay so. The third-party software in the images keeps its own license.

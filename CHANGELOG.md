@@ -2,6 +2,11 @@
 
 ## 0.13.0
 
+### Changed (breaking)
+- **License: AGPL-3.0-only** from this version, with the additional terms in NOTICE (attribution, marking
+  changes, no use of the names "Purgatorium" and "p9m"), the same as Purgatorium (p9m). Versions up to and including
+  0.12.0 stay under the Apache License 2.0.
+
 ### Added
 - A `-kata` image for Kata Containers guests (`ghcr.io/csakaszamok/foxglove:<version>-kata`), built like `-dind` and run
   without `--privileged`: `--runtime kata --cap-add ALL`, seccomp, AppArmor and systempaths unconfined, and
