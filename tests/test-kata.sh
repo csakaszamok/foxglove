@@ -22,7 +22,7 @@ RUNTIME=kata
 CAP_ADD=
 SEC_OPT=
 DEV_RULE=
-set -- $RUN_OPTS
+eval "set -- $RUN_OPTS"
 while [ $# -gt 0 ]; do
     case "$1" in
         --runtime) RUNTIME=$2; shift 2 ;;
@@ -33,8 +33,6 @@ while [ $# -gt 0 ]; do
         *) echo "unsupported RUN_OPTS word: $1" >&2; exit 1 ;;
     esac
 done
-# a rule such as 'a *:* rwm' keeps its quotes from the shell split; strip them
-DEV_RULE=$(printf '%s' "$DEV_RULE" | tr -d "'")
 
 W=$(mktemp -d)
 PROJECT=fgkata$$
