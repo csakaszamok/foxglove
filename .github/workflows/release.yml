@@ -1,6 +1,6 @@
 name: release
 
-# Builds and pushes ghcr.io/csakaszamok/foxglove:<version>-dind and :<version>-sysbox.
+# Builds and pushes ghcr.io/csakaszamok/foxglove:<version>-dind, :<version>-sysbox and :<version>-kata.
 # Runs on a v* tag push. Can also be started by hand for an existing tag
 # (e.g. one created before this workflow existed): the workflow definition
 # comes from the branch it is started on, the image is built from the tag.
@@ -73,6 +73,18 @@ jobs:
           file: Dockerfile.sysbox
           push: true
           tags: ${{ env.IMAGE }}:${{ steps.version.outputs.version }}-sysbox
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.version.outputs.revision }}
+
+      - name: Build and push kata
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.kata
+          push: true
+          tags: ${{ env.IMAGE }}:${{ steps.version.outputs.version }}-kata
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.version=${{ steps.version.outputs.version }}

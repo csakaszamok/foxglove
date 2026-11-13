@@ -73,5 +73,26 @@ else
     fail "exports FRP_SERVER_ADDR/FRP_SERVER_PORT defaults (env: $(grep FRP_ "$TMPDIR/env"))"
 fi
 
+# Test: kata-prepare runs before supervisord and its failure stops startup
+printf '#!/bin/sh\ntouch "%s/supervisord-ran"\n' "$TMPDIR" > "$TMPDIR/bin/supervisord"
+printf '#!/bin/sh\ntouch "%s/kata-ran"\nexit 0\n' "$TMPDIR" > "$TMPDIR/kata-ok"
+printf '#!/bin/sh\ntouch "%s/kata-ran"\nexit 1\n' "$TMPDIR" > "$TMPDIR/kata-bad"
+chmod +x "$TMPDIR/kata-ok" "$TMPDIR/kata-bad"
+rm -f "$TMPDIR/supervisord-ran" "$TMPDIR/kata-ran"
+KATA_PREPARE="$TMPDIR/kata-ok" INSTANCE_NAME_FILE="$TMPDIR/name" \
+    FRP_TOKEN=secret BASE_DOMAIN=my.local run_ep >/dev/null
+ok_rc=$?
+ok_ran=no; [ -f "$TMPDIR/supervisord-ran" ] && [ -f "$TMPDIR/kata-ran" ] && ok_ran=yes
+rm -f "$TMPDIR/supervisord-ran" "$TMPDIR/kata-ran"
+KATA_PREPARE="$TMPDIR/kata-bad" INSTANCE_NAME_FILE="$TMPDIR/name" \
+    FRP_TOKEN=secret BASE_DOMAIN=my.local run_ep >/dev/null
+bad_rc=$?
+if [ $ok_rc -eq 0 ] && [ "$ok_ran" = yes ] && [ $bad_rc -ne 0 ] \
+    && [ -f "$TMPDIR/kata-ran" ] && [ ! -f "$TMPDIR/supervisord-ran" ]; then
+    pass "kata-prepare runs before supervisord and its failure stops startup"
+else
+    fail "kata-prepare hook (ok_rc=$ok_rc ok_ran=$ok_ran bad_rc=$bad_rc)"
+fi
+
 echo "Results: $PASS passed, $FAIL failed"
 [ $FAIL -eq 0 ]
