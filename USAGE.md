@@ -51,7 +51,21 @@ docker run -d --privileged \
 
 **Kata variant (Kata Containers guest):**
 ```sh
-docker run -d --runtime kata   --cap-add ALL   --security-opt seccomp=unconfined   --security-opt apparmor=unconfined   --security-opt systempaths=unconfined   --device-cgroup-rule 'a *:* rwm'   --name foxglove   -e DNS_SERVER=10.0.0.2   -e FRP_SERVER_ADDR=frp.example.com   -e FRP_SERVER_PORT=7000   -e FRP_TOKEN=your-secret-token   -e BASE_DOMAIN=example.com   -v $(pwd)/instance-name:/etc/instance/name:ro   -v foxglove-data:/var/lib/docker   ghcr.io/csakaszamok/foxglove:0.13.0-kata
+docker run -d --runtime kata \
+  --cap-add ALL \
+  --security-opt seccomp=unconfined \
+  --security-opt apparmor=unconfined \
+  --security-opt systempaths=unconfined \
+  --device-cgroup-rule 'a *:* rwm' \
+  --name foxglove \
+  -e DNS_SERVER=10.0.0.2 \
+  -e FRP_SERVER_ADDR=frp.example.com \
+  -e FRP_SERVER_PORT=7000 \
+  -e FRP_TOKEN=your-secret-token \
+  -e BASE_DOMAIN=example.com \
+  -v $(pwd)/instance-name:/etc/instance/name:ro \
+  -v foxglove-data:/var/lib/docker \
+  ghcr.io/csakaszamok/foxglove:0.13.0-kata
 ```
 
 `DNS_SERVER` is the IP of a DNS server the guest can reach (for example a CoreDNS container on the same network;
