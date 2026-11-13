@@ -10,7 +10,8 @@ set -u
 export MSYS_NO_PATHCONV=1
 
 IMAGE=${IMAGE:?set IMAGE to the foxglove -kata image under test}
-RUN_OPTS=${RUN_OPTS:---runtime kata --cap-add ALL --security-opt seccomp=unconfined --security-opt apparmor=unconfined --security-opt systempaths=unconfined --device-cgroup-rule 'a *:* rwm'}
+DEFAULT_RUN_OPTS="--runtime kata --cap-add ALL --security-opt seccomp=unconfined --security-opt apparmor=unconfined --security-opt systempaths=unconfined --device-cgroup-rule 'a *:* rwm'"
+RUN_OPTS=${RUN_OPTS:-$DEFAULT_RUN_OPTS}
 
 PASS=0
 FAIL=0
